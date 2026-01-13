@@ -1,5 +1,7 @@
 # Defold Spite Lines
 
+![alt text](medai/screenshot.png)
+
 This project was created from the "basic 3D" project template.
 
 The simple aim of this method of rendering is to allow for a large number of drawn lines with a shader. 
