@@ -9,16 +9,16 @@
 
 local tinsert = table.insert
 
-local LINE_COUNT    = 50000
-local LINE_LENGTH   = 500
-local LINE_WIDTH    = 2
+local LINE_COUNT    = 5000
+local LINE_LENGTH   = 50
+local LINE_WIDTH    = 15
 local DEPTH_SCALE   = 0.01
 
-local WIDE          = 120 
+local WIDE          = 20 
 local WIDE_HALF     = WIDE / 2 
-local HIGH          = 120 
+local HIGH          = 20 
 local HIGH_HALF     = HIGH / 2
-local DEPTH         = 120
+local DEPTH         = 20
 
 local LINES_MESH = {
     "/line_buffer1#lines_mesh",
@@ -95,20 +95,23 @@ local function set_lines_data(self, mesh_url)
         local color = (r + g * 256 + b * 65536) / ( 256 * 256 * 256 )
 
         local rot = vmath.quat_rotation_z(angle)
+        
         -- Set scale to length and width
-        local len1 = vmath.vector3(length, 0.0, 1) * DEPTH_SCALE
-        local len2 = vmath.vector3(length, LINE_WIDTH, 1) * DEPTH_SCALE
-        local len3 = vmath.vector3(0.0, LINE_WIDTH, 1) * DEPTH_SCALE
+        local len1 = vmath.vector3(length, -LINE_WIDTH * 0.5, 1) * DEPTH_SCALE
+        local len2 = vmath.vector3(length, LINE_WIDTH * 0.5, 1) * DEPTH_SCALE
+        local len3 = vmath.vector3(0.0, LINE_WIDTH * 0.5, 1) * DEPTH_SCALE
+        local len4 = vmath.vector3(0.0, -LINE_WIDTH * 0.5, 1) * DEPTH_SCALE
         
         local endpos1 = pos + vmath.rotate(rot, len1)
         local endpos2 = pos + vmath.rotate(rot, len2)
         local endpos3 = pos + vmath.rotate(rot, len3)
+        local endpos4 = pos + vmath.rotate(rot, len4)
 
         local index = i * 6 * 4
-        set_vertex( self, index + 0, pos, color )
+        set_vertex( self, index + 0, endpos4, color )
         set_vertex( self, index + 1 * 4, endpos1, color )
         set_vertex( self, index + 2 * 4, endpos2, color )
-        set_vertex( self, index + 3 * 4, pos, color )
+        set_vertex( self, index + 3 * 4, endpos4, color )
         set_vertex( self, index + 4 * 4, endpos2, color )
         set_vertex( self, index + 5 * 4, endpos3, color )
     end    
