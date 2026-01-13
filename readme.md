@@ -1,6 +1,6 @@
 # Defold Spite Lines
 
-![alt text](medai/screenshot.png)
+![alt text](media/screenshot.png)
 
 This project was created from the "basic 3D" project template.
 
