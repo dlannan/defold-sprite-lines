@@ -3,6 +3,7 @@ function init(self)
 	msg.post("@render:", "use_camera_projection")
 	msg.post("camera", "acquire_camera_focus")
 
+	self.profiler = false
 	-- rotate the cube
 	go.animate(".", "euler.z", go.PLAYBACK_LOOP_FORWARD, 360, go.EASING_INOUTQUAD, 6)
 	go.animate(".", "euler.x", go.PLAYBACK_LOOP_FORWARD, 360, go.EASING_INOUTQUAD, 9)
@@ -20,7 +21,10 @@ function init(self)
 end
 
 function on_input(self, action_id, action)
-	if action_id == hash("space") then 
+	if action_id == hash("space") and action.released then 
 		msg.post("/main", "clear")
+	elseif action_id == hash("tab") and action.released then 
+		self.profiler = not self.profiler
+		profiler.enable_ui(self.profiler)
 	end
 end

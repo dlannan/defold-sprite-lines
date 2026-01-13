@@ -1,0 +1,26 @@
+#version 140
+
+uniform vs_uniforms {
+	mediump mat4 view_proj;
+};
+
+// positions are in world space
+in mediump vec4 position;
+
+out vec4 out_color;
+const float norm = 0.00390625;
+
+void main()
+{
+	gl_Position = view_proj * vec4(position.xyz, 1.0);
+	float color = position.w * 256.0;
+	float colf = fract(color);
+	out_color.r = floor(color) * norm;
+	color = colf * 256.0;
+	colf = fract(color);
+	out_color.g = floor(color) * norm;;
+	color = colf * 256.0;
+	colf = fract(color);
+	out_color.b = floor(color) * norm;;
+	out_color.a = 1.0;
+}

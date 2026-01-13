@@ -1,4 +1,16 @@
 name: "main"
+instances {
+  id: "line_buffer1"
+  prototype: "/assets/lines/line_buffer.go"
+}
+instances {
+  id: "line_buffer3"
+  prototype: "/assets/lines/line_buffer.go"
+}
+instances {
+  id: "line_buffer2"
+  prototype: "/assets/lines/line_buffer.go"
+}
 scale_along_z: 1
 embedded_instances {
   id: "main"
@@ -50,4 +62,11 @@ embedded_instances {
   position {
     z: 10.0
   }
+}
+embedded_instances {
+  id: "lines"
+  children: "line_buffer1"
+  children: "line_buffer2"
+  children: "line_buffer3"
+  data: ""
 }
