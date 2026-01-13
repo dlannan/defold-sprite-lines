@@ -1,0 +1,62 @@
+-- main.script
+
+-- Requires:
+-- A line.go with a sprite component:
+--     Image: 1x1 white pixel
+--     Atlas: /assets/line.atlas
+-- A line_factory pointing to that line.go
+-- The main.script attached to a main.collection
+
+local tinsert = table.insert
+
+local LINE_COUNT = 5000
+local LINE_LENGTH = 50
+local LINE_WIDTH = 2
+local DEPTH_SCALE = 0.01
+
+-- Placeholder texture for the line (1x1 white pixel)
+-- You can replace this with a proper texture atlas
+local LINE_TEXTURE = "/assets/lines/line.atlas"
+
+-- List of line objects
+local function make_lines(self)
+    self.lines = {}
+    -- Seed random
+    math.randomseed(os.time())
+
+    -- Create 10K line game objects
+    for i = 1, LINE_COUNT do
+        local angle = math.random() * 2 * math.pi
+        local length = LINE_LENGTH + math.random() * 100
+        local pos = vmath.vector3(math.random() * 10 - 5, math.random() * 10 - 5, -10)
+
+        -- Create a line instance
+        local id = factory.create("/main#line_factory", pos, vmath.quat_rotation_z(angle))
+
+        -- Set scale to length and width
+        go.set_scale(vmath.vector3(length, LINE_WIDTH, 1) * DEPTH_SCALE, id)
+
+        -- Save for later (optional)
+        tinsert(self.lines, id)
+    end
+end    
+
+function init(self)
+    make_lines(self)
+end
+
+function reset(self)
+    -- release all the lines and do it again 
+    make_lines(self)
+end 
+
+function on_message(self, message_id, message, sender)
+
+    if message_id == hash("clear") then 
+        -- Delete the instances
+        for i,l in ipairs(self.lines) do go.delete(l, true) end
+        msg.post("/main", "reset")
+    elseif message_id == hash("reset") then 
+        reset(self)
+    end
+end
