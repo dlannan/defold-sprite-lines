@@ -10,6 +10,8 @@ The initial version of this uses Defold's game objects and makes many sprites. T
 
 A new version (which I will put in another branch) will do all of the line drawing by populating a texture with data and rendering the lines entirely in the shader, in a single mesh call. This is a little more complex (since we need to know bounds and so on) but it should allow for very large numbers of lines to be drawn - Id expect in the 100's of thousands and maybe millions. 
 
+## Update (14-01-2026)
+
 The new version is very fast. Around 350x (0.17ms from 60ms).
 ![alt text](media/2026-01-14_14-38.png)
 Additionally more lines can be drawn with minimal cost. 

@@ -9,7 +9,7 @@
 
 local tinsert = table.insert
 
-local LINE_COUNT    = 50000
+local LINE_COUNT    = 500000
 local LINE_LENGTH   = 50
 local LINE_WIDTH    = 15
 local DEPTH_SCALE   = 0.01
