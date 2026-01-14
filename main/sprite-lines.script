@@ -9,7 +9,7 @@
 
 local tinsert = table.insert
 
-local LINE_COUNT    = 5000
+local LINE_COUNT    = 50000
 local LINE_LENGTH   = 50
 local LINE_WIDTH    = 15
 local DEPTH_SCALE   = 0.01
@@ -21,10 +21,13 @@ local HIGH_HALF     = HIGH / 2
 local DEPTH         = 20
 
 local LINES_MESH = {
-    "/line_buffer1#lines_mesh",
-    "/line_buffer2#lines_mesh",
-    "/line_buffer3#lines_mesh",
+    { "/line_buffer1#lines_mesh", "lines1" },
+    { "/line_buffer2#lines_mesh", "lines2" },
+    { "/line_buffer3#lines_mesh", "lines3" },
 }
+
+-- Simple way to manage resource usage
+local resource_pool = {}
 
 -- Placeholder texture for the line (1x1 white pixel)
 -- You can replace this with a proper texture atlas
@@ -64,23 +67,33 @@ end
 -- Make a buffer of quads. Each quad (two tris) is a line. The buffer contains only color and posiiton - no textures.
 local function make_lines_mesh(self, mesh_url)
 
-    self.res[mesh_url] = go.get(mesh_url, "vertices")
-    pprint(self.res[mesh_url])
+    local mesh_name = mesh_url[2]
+    self.res[mesh_name] = go.get(mesh_url[1], "vertices")
+    pprint(self.res[mesh_name])
 
-    if(self.buffer_created[mesh_url] == nil) then 
-        self.line_buffer[mesh_url] = buffer.create(LINE_COUNT * 6, {
-            { name = hash("position"), type = buffer.VALUE_TYPE_FLOAT32, count = 4 },
-        })
+    self.line_buffer[mesh_name] = buffer.create(LINE_COUNT * 6, {
+        { name = hash("position"), type = buffer.VALUE_TYPE_FLOAT32, count = 4 },
+    })
 
-        -- local name = "/runtime_buffer_lines.bufferc"
-        -- local new_buffer = resource.create_buffer(name, { buffer = self.line_buffer[mesh_url] })
-        self.buffer_created[mesh_url] = true
-    end    
+    -- local name = "/runtime_buffer_lines.bufferc"
+    -- local new_buffer = resource.create_buffer(name, { buffer = self.line_buffer[mesh_url] })
+    self.buffer_created[mesh_url] = true
+
+    local buffer_name = string.format("/assets/buffers/line_buffer_%s.bufferc", mesh_name)
+    local resource_buffer = nil
+    if(resource_pool[buffer_name] == nil) then 
+        resource_buffer = resource.create_buffer(buffer_name, { buffer = self.line_buffer[mesh_name]  })
+        resource_pool[buffer_name] = resource_buffer
+    else 
+        resource_buffer = resource_pool[buffer_name]
+    end
+    go.set(mesh_url[1], "vertices",  resource_buffer)    
 end
 
 local function set_lines_data(self, mesh_url)
-    
-    self.line_pos_stream = buffer.get_stream(self.line_buffer[mesh_url], hash("position"))
+
+    local mesh_name = mesh_url[2]
+    self.line_pos_stream = buffer.get_stream(self.line_buffer[mesh_name], hash("position"))
 
     for i = 0, LINE_COUNT-1 do
         local angle = math.random() * 2 * math.pi
@@ -88,19 +101,19 @@ local function set_lines_data(self, mesh_url)
         -- TODO: Make a better random pos?
         local pos = vmath.vector3(math.random() * WIDE - WIDE_HALF, math.random() * HIGH - HIGH_HALF, -DEPTH)
 
-        local r = math.floor(math.random(255)) 
+        local b = math.floor(math.random(255)) 
         local g = math.floor(math.random(255))
-        local b = math.floor(math.random(255))
+        local r = math.floor(math.random(255))
         
         local color = (r + g * 256 + b * 65536) / ( 256 * 256 * 256 )
 
         local rot = vmath.quat_rotation_z(angle)
         
         -- Set scale to length and width
-        local len1 = vmath.vector3(length, -LINE_WIDTH * 0.5, 1) * DEPTH_SCALE
-        local len2 = vmath.vector3(length, LINE_WIDTH * 0.5, 1) * DEPTH_SCALE
-        local len3 = vmath.vector3(0.0, LINE_WIDTH * 0.5, 1) * DEPTH_SCALE
-        local len4 = vmath.vector3(0.0, -LINE_WIDTH * 0.5, 1) * DEPTH_SCALE
+        local len1 = vmath.vector3(length, -LINE_WIDTH * 0.5, 0) * DEPTH_SCALE
+        local len2 = vmath.vector3(length, LINE_WIDTH * 0.5, 0) * DEPTH_SCALE
+        local len3 = vmath.vector3(0.0, LINE_WIDTH * 0.5, 0) * DEPTH_SCALE
+        local len4 = vmath.vector3(0.0, -LINE_WIDTH * 0.5, 0) * DEPTH_SCALE
         
         local endpos1 = pos + vmath.rotate(rot, len1)
         local endpos2 = pos + vmath.rotate(rot, len2)
@@ -117,7 +130,7 @@ local function set_lines_data(self, mesh_url)
     end    
 
     -- go.set(LINES_MESH, "vertices", self.line_buffer)    
-    resource.set_buffer(self.res[mesh_url], self.line_buffer[mesh_url])
+    resource.set_buffer(self.res[mesh_name], self.line_buffer[mesh_name])
 end
 
 function reset(self)
