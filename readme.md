@@ -10,6 +10,14 @@ The initial version of this uses Defold's game objects and makes many sprites. T
 
 A new version (which I will put in another branch) will do all of the line drawing by populating a texture with data and rendering the lines entirely in the shader, in a single mesh call. This is a little more complex (since we need to know bounds and so on) but it should allow for very large numbers of lines to be drawn - Id expect in the 100's of thousands and maybe millions. 
 
+The new version is very fast. Around 350x (0.17ms from 60ms).
+![alt text](media/2026-01-14_14-38.png)
+Additionally more lines can be drawn with minimal cost. 
+
+Note: I highly recommend _not_ changing the vertex shader. Using a single position vec4 vertex stream looks like it is almost much faster (5-6x?) than a position + color. This is because it saves on context creation as well as stream buffer sizes and alignments. It surprised me how fast this ended up. 
+
+Thus I probably wont be bothering with the post render method. I do not think it could go this fast.
+
 ## Why
 
 The main use for this if for my own worldbuilder system that renders real world roads onto realworld landscape and urban data. I wanted something that could allow large 3D vistas across landscapes of a country, that included the urban areas and the roads. Doing this using traditional line drawing is _slow_. 
